@@ -52,6 +52,7 @@ var main = (function($) { var _ = {
 	 * @var {jQuery}
 	 */
 	$thumbnails: null,
+	$thumbnails2: null,
 
 	/**
 	 * Viewer.
@@ -144,6 +145,8 @@ var main = (function($) { var _ = {
 
 		// Thumbnails.
 			_.$thumbnails = $('#thumbnails');
+			_.$thumbnails2 = $('#thumbnails2');
+
 
 		// Viewer.
 			_.$viewer = $(
@@ -408,6 +411,24 @@ var main = (function($) { var _ = {
 
 				});
 
+			_.$thumbnails2
+				.on('click', '.thumbnail', function(event) {
+
+					var $this = $(this);
+
+					// Stop other events.
+						event.preventDefault();
+						event.stopPropagation();
+
+					// Locked? Blur.
+						if (_.locked)
+							$this.blur();
+
+					// Switch to this thumbnail's slide.
+						_.switchTo($this.data('index'));
+
+				});
+
 		// Create slides from thumbnails.
 			_.$thumbnails.children()
 				.each(function() {
@@ -472,6 +493,70 @@ var main = (function($) { var _ = {
 						$thumbnail.data('index', _.slides.length - 1);
 
 				});
+
+			_.$thumbnails2.children()
+				.each(function() {
+
+					var	$this = $(this),
+						$thumbnail = $this.children('.thumbnail'),
+						s;
+
+					// Slide object.
+						s = {
+							$parent: $this,
+							$slide: null,
+							$slideImage: null,
+							$slideCaption: null,
+							url: $thumbnail.attr('href'),
+							loaded: false
+						};
+
+					// Parent.
+						$this.attr('tabIndex', '-1');
+
+					// Slide.
+
+						// Create elements.
+	 						s.$slide = $('<div class="slide"><div class="caption"></div><div class="image"></div></div>');
+
+	 					// Image.
+ 							s.$slideImage = s.$slide.children('.image');
+
+ 							// Set background stuff.
+	 							s.$slideImage
+		 							.css('background-image', '')
+		 							.css('background-position', ($thumbnail.data('position') || 'center'));
+
+						// Caption.
+							s.$slideCaption = s.$slide.find('.caption');
+
+							// Move everything *except* the thumbnail itself to the caption.
+								$this.children().not($thumbnail)
+									.appendTo(s.$slideCaption);
+
+					// Preload?
+						if (_.settings.preload) {
+
+							// Force image to download.
+								var $img = $('<img src="' + s.url + '" />');
+
+							// Set slide's background image to it.
+								s.$slideImage
+									.css('background-image', 'url(' + s.url + ')');
+
+							// Mark slide as loaded.
+								s.$slide.addClass('loaded');
+								s.loaded = true;
+
+						}
+
+					// Add to slides array.
+						_.slides.push(s);
+
+					// Set thumbnail's index.
+						$thumbnail.data('index', _.slides.length - 1);
+
+				});	
 
 	},
 
