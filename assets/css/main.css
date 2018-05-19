@@ -868,11 +868,14 @@
 				position: relative;
 				border: 0;
 				outline: 0;
+				height:  100%;
 			}
 
 				#thumbnails article .thumbnail img {
 					display: block;
 					width: 100%;
+					background-size: cover;
+					/* height: 100%; */
 				}
 
 				#thumbnails article .thumbnail:before {
